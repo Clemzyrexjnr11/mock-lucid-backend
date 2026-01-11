@@ -37,19 +37,15 @@ export const loginUsers = async function (req, res) {
 };
 
 export const changeUserPassword = async function (req, res) {
-  let authtoken = req.headers["authorization"].split(" ")[1];
-  let { username, currentPassword, newPassword } = req.body;
-
-  try {
-    let user = await User.findOne({
-      where: { email: username, password: currentPassword },
+  let {currentPassword, newPassword } = req.body;
+  const userEmail = req.user['email'];
+     let user = await User.findOne({
+      where: { email: userEmail, password: currentPassword },
     });
 
-   if (!authtoken) {
-      res.status(401).json({ message: "User is unauthorized." });
-    }
+  try {
 
-    else if (!user) {
+   if (!user) {
        res.status(404).json({ message: "User not found, Kindly provide a correct Current password" });
     }
 
@@ -63,7 +59,7 @@ export const changeUserPassword = async function (req, res) {
 
       await User.update({
         password: newPassword
-      }, {where: { email : username}}).then((result)=>{
+      }, {where: { email : userEmail}}).then((result)=>{
 
          res
         .status(200)
@@ -73,12 +69,31 @@ export const changeUserPassword = async function (req, res) {
         });
       
       }).catch((err)=>{
-
         console.log('Error occured while changing password', err)
       })
 
     }
   } catch(error) {
-
+     res.status(500).json({message:'Internal server error'});
+     console.log(error);
   }
+
 }
+
+  export const getSupportInformation = async function (req, res){
+     try{
+         res.status(200).json({
+          message:'Support information retrieved successfully',
+          chatSupport:'etekaclement77@gmail.com',
+          callSupport:'09046409457',
+          location:{
+            lat:9.0607151,
+            lng:7.4768515,
+            name:'Lagos, Nigeria'
+          }
+         })
+     }catch(error){
+     res.status(500).json({message:'Internal server error'});
+     console.log(error);
+     }
+  }
